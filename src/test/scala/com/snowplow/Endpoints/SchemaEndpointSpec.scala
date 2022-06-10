@@ -2,7 +2,6 @@ package com.snowplow.Endpoints
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import com.snowplow.SchemaEndpoint
 import org.http4s.dsl.io.POST
 import org.http4s.implicits.{http4sKleisliResponseSyntaxOptionT, http4sLiteralsSyntax}
 import org.http4s.{Request, Status, Uri}
@@ -12,7 +11,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SchemaEndpointSpec extends AnyFunSpecLike with Matchers {
 
-  val validJson =
+  val validJson: String =
     """
       |{
       |  "$schema": "http://json-schema.org/draft-04/schema#",
@@ -46,13 +45,13 @@ class SchemaEndpointSpec extends AnyFunSpecLike with Matchers {
       |}
       |""".stripMargin
 
-  val schemaId = "SomeId"
+  val schemaId = "someId"
 
   describe("SchemaEndpoint") {
-    val endpoint = SchemaEndpoint[IO]().schemaRoutes
+    val endpoint = SchemaEndpoint[IO]().routes
     it("should accept valid json") {
       val request =
-        Request[IO](POST, Uri.fromString(schemaId).getOrElse(uri""))
+        Request[IO](POST,Uri.fromString(s"http://localhost/$schemaId").getOrElse(uri""))
           .withEntity(validJson)
 
       endpoint.orNotFound(request).unsafeRunSync().status shouldBe Status.Created
@@ -60,7 +59,7 @@ class SchemaEndpointSpec extends AnyFunSpecLike with Matchers {
 
     it("should return bad request for invalid json") {
       val request =
-        Request[IO](POST, Uri.fromString(schemaId).getOrElse(uri""))
+        Request[IO](POST,Uri.fromString(s"http://localhost/$schemaId").getOrElse(uri""))
           .withEntity(validJson.replace('"', '&'))
 
       endpoint.orNotFound(request).unsafeRunSync().status shouldBe Status.BadRequest
