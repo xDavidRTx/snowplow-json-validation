@@ -16,3 +16,17 @@ libraryDependencies ++= Seq(
   Library.Http4sBlazeServer,
   Library.JsonValidator
 )
+
+enablePlugins(FlywayPlugin)
+
+libraryDependencies += "org.hsqldb" % "hsqldb" % "2.6.1"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.3.6"
+libraryDependencies += "com.typesafe.slick" %% "slick" % "3.3.3"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.3.6"
+libraryDependencies +="com.typesafe.slick" %% "slick-hikaricp" % "3.3.3"
+libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
+
+flywayUrl := "jdbc:postgresql://localhost:5432/postgres"
+flywayUser := "postgres"
+flywayPassword := "docker"
+flywayLocations += "db/migration"

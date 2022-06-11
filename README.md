@@ -1,12 +1,13 @@
-# Snowplow engineering technical test instructions - JSON validation service
+# How to run the service
 
-Using this specification you will need to build a REST-service for validating JSON documents against JSON Schemas.
+A PostgreSql database is required to be able to run this service. There is several solutions for doing so but the easiest one is to use Docker with: 
 
-This REST-service should allow users to upload JSON Schemas and store them at unique URI and then validate JSON documents against these URIs.
+```
+docker run --name postgres-db -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres
+export POSTGRES_JSON_VALIDATOR_USER=postgres
+export POSTGRES_JSON_VALIDATOR_PASSOWORD=docker
+```
 
-Additionally, this service will "clean" every JSON document before validation: remove keys for which the value is null.
-
-Client-side software as well as GUI is out of scope of this specification - user can choose any tool able to communicate via HTTP like `curl` or write their own.
 
 
 ## API Specification

@@ -16,5 +16,4 @@ object Library {
   val CirceParser = "io.circe" %% "circe-parser" % Version.CirceVersion
   val ScalaTest = "org.scalatest" %% "scalatest" % Version.ScalaTest % "test"
   val JsonValidator = "com.github.java-json-tools" % "json-schema-validator" % Version.JsonValidator
-
 }
