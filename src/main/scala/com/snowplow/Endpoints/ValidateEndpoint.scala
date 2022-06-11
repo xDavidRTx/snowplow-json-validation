@@ -13,10 +13,9 @@ import org.http4s.HttpRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-case class ValidateEndpoint[F[_]: Sync]()(implicit F: Async[F]) extends Http4sDsl[F] with LazyLogging {
+case class ValidateEndpoint[F[_]: Sync](dao: SchemasDao)(implicit F: Async[F]) extends Http4sDsl[F] with LazyLogging {
 
-  def routes: HttpRoutes[F] = {
-    lazy val dao = new SchemasDao
+  def routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> (Root / schemaId) =>
         Async[F].fromFuture(F.delay(dao.getSchemaById(schemaId))) flatMap {
@@ -27,7 +26,9 @@ case class ValidateEndpoint[F[_]: Sync]()(implicit F: Async[F]) extends Http4sDs
               .as[String]
               .map(parse)
               .flatMap {
-                case Left(value) => BadRequest(ErrorResponse("validateDocument", schemaId, value.message).asJson)
+                case Left(e) =>
+                  logger.error("Invalid Json", e)
+                  NotAcceptable(ErrorResponse("validateDocument", schemaId, "Invalid Json payload").asJson)
                 case Right(json) =>
                   JsonSchema
                     .validate(schema.toString(), json)
@@ -38,5 +39,4 @@ case class ValidateEndpoint[F[_]: Sync]()(implicit F: Async[F]) extends Http4sDs
               }
         }
     }
-  }
 }

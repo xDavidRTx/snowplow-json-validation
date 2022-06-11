@@ -2,8 +2,11 @@ package com.snowplow.Endpoints
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import cats.implicits.catsSyntaxOptionId
 import com.snowplow.Common.{schema, schemaId}
 import com.snowplow.Database.{Schema, SchemasDao}
+import io.circe.Json
+import io.circe.parser.parse
 import org.http4s.Method.GET
 import org.http4s.dsl.io.POST
 import org.http4s.implicits.{http4sKleisliResponseSyntaxOptionT, http4sLiteralsSyntax}
@@ -19,10 +22,11 @@ class SchemaEndpointSpec extends AnyFunSpecLike with Matchers with MockFactory {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   describe("SchemaEndpoint") {
-    val endpoint = SchemaEndpoint[IO]().routes
     val db       = stub[SchemasDao]
+    val endpoint = SchemaEndpoint[IO](db).routes
     it("should accept valid json") {
       (db.insertSchema _).when(Schema(schemaId, schema)).returns(Future[Int](1))
+
       val request =
         Request[IO](POST, Uri.fromString(s"http://localhost/$schemaId").getOrElse(uri""))
           .withEntity(schema)
@@ -39,6 +43,8 @@ class SchemaEndpointSpec extends AnyFunSpecLike with Matchers with MockFactory {
     }
 
     it("should return the correct Json Schema") {
+      (db.getSchemaById _).when(schemaId).returns(Future[Option[Json]](parse(schema).getOrElse(Json.Null).some))
+
       val request =
         Request[IO](GET, Uri.fromString(s"http://localhost/$schemaId").getOrElse(uri""))
 
