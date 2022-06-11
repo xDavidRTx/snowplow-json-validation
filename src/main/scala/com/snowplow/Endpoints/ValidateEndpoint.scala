@@ -1,11 +1,10 @@
 package com.snowplow.Endpoints
 
 import cats.effect.kernel.{Async, Sync}
-import cats.implicits.catsSyntaxOptionId
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.snowplow.Database.SchemasDao
-import com.snowplow.Domain.HttpResponses.Result
+import com.snowplow.Domain.{ErrorResponse, SuccessResponse}
 import com.snowplow.JsonSchema.JsonSchema
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.parser.parse
@@ -22,19 +21,19 @@ case class ValidateEndpoint[F[_]: Sync]()(implicit F: Async[F]) extends Http4sDs
       case req @ POST -> (Root / schemaId) =>
         Async[F].fromFuture(F.delay(dao.getSchemaById(schemaId))) flatMap {
           case None =>
-            NotFound(Result("validateDocument", schemaId, "error", s"Schema with id $schemaId not found!".some).asJson)
+            NotFound(ErrorResponse("validateDocument", schemaId, s"Schema with id $schemaId not found!").asJson)
           case Some(schema) =>
             req
               .as[String]
               .map(parse)
               .flatMap {
-                case Left(value) => BadRequest(Result("validateDocument", schemaId, "error", value.message.some).asJson)
+                case Left(value) => BadRequest(ErrorResponse("validateDocument", schemaId, value.message).asJson)
                 case Right(json) =>
                   JsonSchema
                     .validate(schema.toString(), json)
-                    .fold(Ok(Result("validateDocument", schemaId, "success").asJson.deepDropNullValues))(
+                    .fold(Ok(SuccessResponse("validateDocument", schemaId).asJson.deepDropNullValues))(
                       validationResult =>
-                        BadRequest(Result("validateDocument", schemaId, "success", validationResult.some).asJson)
+                        BadRequest(ErrorResponse("validateDocument", schemaId, validationResult).asJson)
                     )
               }
         }
