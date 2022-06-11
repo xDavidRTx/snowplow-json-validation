@@ -14,17 +14,17 @@ libraryDependencies ++= Seq(
   Library.Http4sCirce,
   Library.CirceParser,
   Library.Http4sBlazeServer,
-  Library.JsonValidator
+  Library.JsonValidator,
+  Library.Hsqldb,
+  Library.Postgresql,
+  Library.Slick,
+  Library.SlickHikaricp,
+  Library.ScalaMock,
+  Library.Logback,
+  Library.ScalaLogging,
 )
 
 enablePlugins(FlywayPlugin)
-
-libraryDependencies += "org.hsqldb" % "hsqldb" % "2.6.1"
-libraryDependencies += "org.postgresql" % "postgresql" % "42.3.6"
-libraryDependencies += "com.typesafe.slick" %% "slick" % "3.3.3"
-libraryDependencies += "org.postgresql" % "postgresql" % "42.3.6"
-libraryDependencies +="com.typesafe.slick" %% "slick-hikaricp" % "3.3.3"
-libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
 
 flywayUrl := "jdbc:postgresql://localhost:5432/postgres"
 flywayUser := "postgres"
